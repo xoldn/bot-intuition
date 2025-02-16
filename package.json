@@ -1,0 +1,13 @@
+{
+    "name": "telegram-bot",
+    "version": "1.0.0",
+    "description": "Telegram bot hosted on Render",
+    "main": "bot.js",
+    "scripts": {
+      "start": "node bot.js"
+    },
+    "dependencies": {
+      "node-telegram-bot-api": "^0.61.0"
+    }
+  }
+  
