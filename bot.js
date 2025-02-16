@@ -4,7 +4,7 @@ const axios = require("axios");
 // Берем токены из переменных окружения
 const TOKEN = process.env.BOT_TOKEN;
 const GAME_URL = process.env.GAME_URL;
-const SERVER_URL = process.env.SERVER_URL; // URL сервера игры
+const SERVER_URL = process.env.GAME_URL; // URL сервера игры
 
 // Запускаем бота
 const bot = new TelegramBot(TOKEN, { polling: true });
