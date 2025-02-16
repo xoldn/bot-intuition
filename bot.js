@@ -2,7 +2,7 @@ const TelegramBot = require("node-telegram-bot-api");
 
 // Берем токен из переменной окружения
 const TOKEN = process.env.BOT_TOKEN;
-const GAME_URL = "https://intuition-3kyw.onrender.com/";
+const GAME_URL = process.env.GAME_URL;
 
 // Запускаем бота
 const bot = new TelegramBot(TOKEN, { polling: true });
