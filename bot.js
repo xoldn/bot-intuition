@@ -15,10 +15,9 @@ bot.onText(/\/start|\/play/, (msg) => {
 
     const keyboard = {
         reply_markup: {
-            keyboard: [
-                [{ text: "Играть", web_app: { url: GAME_URL } }]
-            ],
-            resize_keyboard: true
+            inline_keyboard: [
+                [{ text: "🎮 Играть", web_app: { url: GAME_URL } }]
+            ]
         }
     };
 
