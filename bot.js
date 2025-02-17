@@ -26,10 +26,16 @@ bot.onText(/\/start|\/play/, (msg) => {
     bot.sendMessage(chatId, "Запускаем игру!", keyboard);
 });
 
-// Обрабатываем запрос на запуск игры через Game Platform
+// Обрабатываем запуск игры через callback_query
 bot.on("callback_query", (query) => {
     if (query.game_short_name) {
-        bot.answerCallbackQuery(query.id, { url: GAME_URL });
+        const userId = query.from.id;
+        const username = query.from.username || "Игрок";
+
+        // Формируем ссылку с user_id для WebApp
+        const gameUrlWithParams = `${GAME_URL}?user_id=${userId}&username=${username}`;
+
+        bot.answerCallbackQuery(query.id, { url: gameUrlWithParams });
     }
 });
 
