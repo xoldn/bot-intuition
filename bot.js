@@ -20,19 +20,3 @@ bot.on("callback_query", (query) => {
     }
 });
 
-// Установка нового рекорда в Telegram
-bot.onText(/\/setscore (.+)/, async (msg, match) => {
-    const [userId, score, chatId, messageId] = match[1].split(" ");
-    
-    try {
-        await bot.setGameScore(userId, parseInt(score), {
-            chat_id: parseInt(chatId),
-            message_id: parseInt(messageId),
-            force: true
-        });
-
-        bot.sendMessage(chatId, `🎉 Новый рекорд! ${score} очков!`);
-    } catch (error) {
-        console.error("Ошибка при установке рекорда:", error);
-    }
-});
