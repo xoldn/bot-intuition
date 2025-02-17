@@ -26,6 +26,13 @@ bot.onText(/\/start|\/play/, (msg) => {
     bot.sendMessage(chatId, "Запускаем игру!", keyboard);
 });
 
+// Обрабатываем запрос на запуск игры через Game Platform
+bot.on("callback_query", (query) => {
+    const chatId = query.message.chat.id;
+
+    bot.answerCallbackQuery(query.id, { url: GAME_URL }); // Открываем игру
+});
+
 // Команда /top для отображения списка лучших игроков
 bot.onText(/\/top/, async (msg) => {
     const chatId = msg.chat.id;
