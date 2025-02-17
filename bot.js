@@ -28,9 +28,9 @@ bot.onText(/\/start|\/play/, (msg) => {
 
 // Обрабатываем запрос на запуск игры через Game Platform
 bot.on("callback_query", (query) => {
-    const chatId = query.message.chat.id;
-
-    bot.answerCallbackQuery(query.id, { url: GAME_URL }); // Открываем игру
+    if (query.game_short_name) {
+        bot.answerCallbackQuery(query.id, { url: GAME_URL });
+    }
 });
 
 // Команда /top для отображения списка лучших игроков
