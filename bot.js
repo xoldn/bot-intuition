@@ -9,21 +9,6 @@ const bot = new TelegramBot(TOKEN, { polling: true });
 
 console.log("Бот запущен!");
 
-// Команда для начала игры
-bot.onText(/\/start|\/play/, (msg) => {
-    const chatId = msg.chat.id;
-
-    const keyboard = {
-        reply_markup: {
-            inline_keyboard: [
-                [{ text: "🎮 Играть", callback_game: {} }]
-            ]
-        }
-    };
-
-    bot.sendGame(chatId, keyboard);
-});
-
 // Запуск игры через callback_query
 bot.on("callback_query", (query) => {
     if (query.game_short_name) {
@@ -49,29 +34,5 @@ bot.onText(/\/setscore (.+)/, async (msg, match) => {
         bot.sendMessage(chatId, `🎉 Новый рекорд! ${score} очков!`);
     } catch (error) {
         console.error("Ошибка при установке рекорда:", error);
-    }
-});
-
-// Команда для отображения рейтинга
-bot.onText(/\/top/, async (msg) => {
-    const chatId = msg.chat.id;
-
-    try {
-        const response = await axios.get(`${SERVER_URL}/leaderboard`);
-        const leaderboard = response.data;
-
-        if (!leaderboard.length) {
-            return bot.sendMessage(chatId, "⏳ Пока нет результатов.");
-        }
-
-        let leaderboardText = "🏆 **Топ игроков:**\n";
-        leaderboard.forEach((player, index) => {
-            leaderboardText += `${index + 1}. ${player.username}: ✅ ${player.correct} | ❌ ${player.wrong}\n`;
-        });
-
-        bot.sendMessage(chatId, leaderboardText);
-    } catch (error) {
-        console.error("Ошибка при получении топ-игроков:", error);
-        bot.sendMessage(chatId, "⚠ Ошибка при получении данных.");
     }
 });
