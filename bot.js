@@ -24,13 +24,16 @@ bot.on("callback_query", (query) => {
     }
 });
 
-// Обработка результата игры через команду (пример)
-// Пользователь может отправить сообщение вида: /score 100
+// Изменения внесены в обработчике "/score", добавлен параметр game_short_name
 bot.on("message", (msg) => {
     if (msg.text && msg.text.startsWith("/score")) {
         const score = parseInt(msg.text.split(" ")[1]);
         // Обновление результата игры через Telegram API
-        bot.setGameScore(msg.from.id, score, { chat_id: msg.chat.id, message_id: msg.message_id })
+        bot.setGameScore(msg.from.id, score, { 
+            chat_id: msg.chat.id, 
+            message_id: msg.message_id,
+            game_short_name: GAME_SHORT_NAME
+        })
             .then(() => {
                 bot.sendMessage(msg.chat.id, `Ваш результат: ${score}`);
             })
