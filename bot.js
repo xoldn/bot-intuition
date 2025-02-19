@@ -1,44 +1,80 @@
-const TelegramBot = require("node-telegram-bot-api");
-const axios = require("axios");
+const TelegramBot = require('node-telegram-bot-api');
+const crypto = require('crypto');
 
-const TOKEN = process.env.BOT_TOKEN;
-const GAME_URL = process.env.GAME_URL;
-const GAME_SHORT_NAME = process.env.GAME_SHORT_NAME; // short name установленный у бота
+// Сохраняем рейтинг пользователей в памяти
+const ranking = {};
 
-const bot = new TelegramBot(TOKEN, { polling: true });
+// Храним активные игры: userId -> ответ
+const activeGames = {};
 
-console.log("Бот запущен!");
+const colors = ['Red', 'Blue', 'Green', 'Yellow'];
 
-// Команда для отправки сообщения с игрой
-bot.onText(/\/game/, (msg) => {
-    bot.sendGame(msg.chat.id, GAME_SHORT_NAME);
+// Генерация случайного цвета с использованием crypto для повышения безопасности
+function getRandomColor() {
+    const index = crypto.randomInt(0, colors.length);
+    return colors[index];
+}
+
+// Получаем токен из переменных окружения
+const token = process.env.TELEGRAM_TOKEN;
+if (!token) {
+    console.error('Требуется переменная окружения TELEGRAM_TOKEN');
+    process.exit(1);
+}
+
+// Создаем экземпляр бота с режимом long polling
+const bot = new TelegramBot(token, { polling: true });
+
+// Обработчик команды /start
+bot.onText(/\/start/, (msg) => {
+    const chatId = msg.chat.id;
+    const userId = msg.from.id;
+    
+    // Генерируем случайный правильный ответ
+    const answer = getRandomColor();
+    activeGames[userId] = answer;
+
+    // Формируем inline клавиатуру с вариантами выбора
+    const options = {
+        reply_markup: {
+            inline_keyboard: [
+                colors.map(color => ({
+                    text: color,
+                    callback_data: color
+                }))
+            ]
+        }
+    };
+
+    bot.sendMessage(chatId, "Выбери цвет карты:", options);
 });
 
-// Запуск игры через callback_query
-bot.on("callback_query", (query) => {
-    if (query.game_short_name) {
-        const userId = query.from.id;
-        const username = query.from.username || "Игрок";
-        const gameUrlWithParams = `${GAME_URL}?user_id=${userId}&username=${username}&chat_id=${query.message.chat.id}&message_id=${query.message.message_id}`;
-        bot.answerCallbackQuery(query.id, { url: gameUrlWithParams });
+// Обработка нажатия кнопок inline клавиатуры
+bot.on('callback_query', (callbackQuery) => {
+    const message = callbackQuery.message;
+    const userId = callbackQuery.from.id;
+    const selectedColor = callbackQuery.data;
+    const gameAnswer = activeGames[userId];
+    
+    if (!gameAnswer) {
+        bot.answerCallbackQuery(callbackQuery.id, { text: "Игра не активна. Напиши /start" });
+        return;
     }
-});
-
-// Изменения внесены в обработчике "/score", добавлен параметр game_short_name
-bot.on("message", (msg) => {
-    if (msg.text && msg.text.startsWith("/score")) {
-        const score = parseInt(msg.text.split(" ")[1]);
-        // Обновление результата игры через Telegram API
-        bot.setGameScore(msg.from.id, score, { 
-            chat_id: msg.chat.id, 
-            message_id: msg.message_id,
-            game_short_name: GAME_SHORT_NAME
-        })
-            .then(() => {
-                bot.sendMessage(msg.chat.id, `Ваш результат: ${score}`);
-            })
-            .catch((err) => {
-                bot.sendMessage(msg.chat.id, `Ошибка при установке результата: ${err.message}`);
-            });
+    
+    let responseText = "";
+    if (selectedColor === gameAnswer) {
+        ranking[userId] = (ranking[userId] || 0) + 1;
+        responseText = `Правильно! Рейтинг: ${ranking[userId]}`;
+    } else {
+        responseText = `Неправильно! Правильный ответ: ${gameAnswer}. Рейтинг: ${ranking[userId] || 0}`;
     }
+    
+    // Очищаем активную игру для пользователя
+    delete activeGames[userId];
+    
+    // Отправляем уведомление о результате через ответ на callback
+    bot.answerCallbackQuery(callbackQuery.id, { text: responseText });
+    
+    // Отправляем сообщение в чат
+    bot.sendMessage(message.chat.id, responseText);
 });
