@@ -16,7 +16,7 @@ function getRandomColor() {
 }
 
 // Получаем токен из переменных окружения
-const token = process.env.TELEGRAM_TOKEN;
+const token = process.env.BOT_TOKEN;
 if (!token) {
     console.error('Требуется переменная окружения TELEGRAM_TOKEN');
     process.exit(1);
